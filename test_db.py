@@ -1,10 +1,12 @@
 import hashlib
+import secrets
+
 from app.database import db, User, Advertisement
 import jwt
 
 
 # Добавление тестовых данных
-def create_user(username, password, is_admin=False, two_factor_secret=None):
+def create_user(username, password, is_admin=False, two_factor_secret=None, refresh_token=None):
     """
     Создает нового пользователя и сохраняет его в базу данных.
 
@@ -12,6 +14,7 @@ def create_user(username, password, is_admin=False, two_factor_secret=None):
     :param password: Пароль пользователя в открытом виде.
     :param is_admin: Флаг администратора (по умолчанию False).
     :param two_factor_secret: Секретный ключ для двухфакторной аутентификации (опционально).
+    :param refresh_token: рефреш токен
     :return: Созданный объект User.
     """
     # Проверка, существует ли пользователь с таким username
@@ -26,7 +29,8 @@ def create_user(username, password, is_admin=False, two_factor_secret=None):
         username=username,
         password_hash=password_hash,
         is_admin=is_admin,
-        two_factor_secret=two_factor_secret
+        two_factor_secret=two_factor_secret,
+        refresh_token=refresh_token
     )
 
     # Добавление пользователя в сессию и сохранение в базу данных
@@ -55,7 +59,8 @@ def get_all_users(include_password_hash=False, filter_admins=False):
             'id': user.id,
             'username': user.username,
             'is_admin': user.is_admin,
-            'two_factor_secret': user.two_factor_secret
+            'two_factor_secret': user.two_factor_secret,
+            'refresh': user.refresh_token
         }
         if include_password_hash:
             user_data['password_hash'] = user.password_hash
@@ -161,7 +166,8 @@ def get_user_data(user_id):
         'id': user.id,
         'username': user.username,
         'is_admin': user.is_admin,
-        'two_factor_secret': user.two_factor_secret
+        'two_factor_secret': user.two_factor_secret,
+        'refresh': user.refresh_token
     }
 
 
@@ -363,4 +369,115 @@ def update_two_factor_secret(user_id, new_secret):
     except Exception as e:
         db.session.rollback()
         print(f"Ошибка при изменении two_factor_secret: {e}")
+        return False
+
+
+
+
+def create_refresh_token(user_id):
+    """
+    Создает и сохраняет новый refresh-токен для пользователя.
+
+    :param user_id: ID пользователя
+    :return: Исходный refresh-токен (строка) или None, если операция не удалась
+    """
+    # Генерация нового refresh-токена
+    refresh_token = secrets.token_urlsafe(32)
+
+    # Хэширование refresh-токена
+    hashed_token = hashlib.sha256(refresh_token.encode()).hexdigest()
+
+    # Находим пользователя по ID
+    user = User.query.get(user_id)
+    if not user:
+        print(f"Пользователь с ID {user_id} не найден.")
+        return None
+
+    # Сохраняем хэш в базу данных
+    user.refresh_token = hashed_token
+    try:
+        db.session.commit()
+        print(f"Refresh-токен успешно создан для пользователя {user.username}.")
+        return refresh_token  # Возвращаем исходный токен для клиента
+    except Exception as e:
+        db.session.rollback()
+        print(f"Ошибка при создании refresh-токена: {e}")
+        return None
+
+
+def delete_refresh_token(user_id):
+    """
+    Удаляет refresh-токен для пользователя.
+
+    :param user_id: ID пользователя
+    :return: True, если операция успешна, иначе False
+    """
+    # Находим пользователя по ID
+    user = User.query.get(user_id)
+    if not user:
+        print(f"Пользователь с ID {user_id} не найден.")
+        return False
+
+    # Удаляем refresh-токен
+    user.refresh_token = None
+    try:
+        db.session.commit()
+        print(f"Refresh-токен успешно удален для пользователя {user.username}.")
+        return True
+    except Exception as e:
+        db.session.rollback()
+        print(f"Ошибка при удалении refresh-токена: {e}")
+        return False
+
+
+def get_refresh_token(user_id):
+    """
+    Получает хэшированный refresh-токен для пользователя.
+
+    :param user_id: ID пользователя
+    :return: Хэшированный refresh-токен (строка) или None, если токен не найден
+    """
+    # Находим пользователя по ID
+    user = User.query.get(user_id)
+    if not user:
+        print(f"Пользователь с ID {user_id} не найден.")
+        return None
+
+    # Проверяем наличие refresh-токена
+    if not user.refresh_token:
+        print(f"Refresh-токен для пользователя {user.username} не установлен.")
+        return None
+
+    print(f"Refresh-токен успешно получен для пользователя {user.username}.")
+    return user.refresh_token
+
+
+def verify_refresh_token(user_id, provided_token):
+    """
+    Проверяет, является ли предоставленный refresh-токен действительным.
+
+    :param user_id: ID пользователя
+    :param provided_token: Исходный refresh-токен, предоставленный клиентом
+    :return: True, если токен верный, иначе False
+    """
+    # Находим пользователя по ID
+    user = User.query.get(user_id)
+    if not user:
+        print(f"Пользователь с ID {user_id} не найден.")
+        return False
+
+    # Проверяем наличие refresh-токена
+    if not user.refresh_token:
+        print(f"Refresh-токен для пользователя {user.username} не установлен.")
+        return False
+
+    # Хэшируем предоставленный токен
+    hashed_provided_token = hashlib.sha256(provided_token.encode()).hexdigest()
+
+    # Сравниваем хэши
+    if user.refresh_token == hashed_provided_token:
+        print(f"Refresh-токен для пользователя {user.username} верный.")
+        return True
+    else:
+        print(f"Refresh-токен для пользователя {user.username} неверный.")
         return False
