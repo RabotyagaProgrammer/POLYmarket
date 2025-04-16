@@ -18,7 +18,7 @@ def login():
         name = request.form.get('name')
         password = request.form.get('password')
         print(get_all_users())
-        user = get_user_by_field('username', name)
+        user = get_user_by_field('name', name)
         if user and verify_password(name, password):
             session['2fa_user_id'] = user.id
 
