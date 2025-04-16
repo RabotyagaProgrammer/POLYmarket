@@ -2,7 +2,11 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     <mapping directory="" vcs="Git" />
+=======
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+>>>>>>> Stashed changes
 =======
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
 >>>>>>> Stashed changes
