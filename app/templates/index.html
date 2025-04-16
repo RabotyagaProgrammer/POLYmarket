@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>πolyMarket</title>
+
+    <!-- Font Awesome CDN для иконки лупы -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+        }
+
+        .navbar {
+            background-color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+        }
+
+        .logo {
+            font-size: 24px;
+            color: #28a745;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .profile-btn {
+            background-color: transparent;
+            border: 1px solid #28a745;
+            color: #28a745;
+            border-radius: 8px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.2s ease;
+        }
+
+        .profile-btn:hover {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 60px auto;
+            text-align: center;
+        }
+
+        .search-box {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+
+        .search-box input[type="text"] {
+            width: 100%;
+            padding: 14px 14px 14px 42px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+            font-size: 18px;
+        }
+
+        .category-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .categories {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .category-btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 15px;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+        }
+
+        .category-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <a href="{{ url_for('main.index') }}" class="logo">πolyMarket</a>
+        <a href="{{ url_for('main.profile') }}"><button class="profile-btn">Профиль</button></a>
+    </div>
+
+    <div class="container">
+        <div class="search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" placeholder="Поиск товаров...">
+        </div>
+
+        <div class="category-title">Категории</div>
+        <div class="categories">
+            <a href="{{ url_for('main.category', category_name='tech') }}" class="category-btn">Техника</a>
+            <a href="{{ url_for('main.category', category_name='food') }}" class="category-btn">Продукты</a>
+            <a href="{{ url_for('main.category', category_name='clothes') }}" class="category-btn">Одежда</a>
+            <a href="{{ url_for('main.category', category_name='books') }}" class="category-btn">Книги</a>
+            <a href="{{ url_for('main.category', category_name='home') }}" class="category-btn">Хозтовары</a>
+        </div>
+    </div>
+
+</body>
+</html>
