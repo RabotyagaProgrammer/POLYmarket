@@ -39,6 +39,17 @@ def create_user(username, password, is_admin=False, two_factor_secret=None, refr
 
     return new_user
 
+def get_user_by_field(field, value):
+    """
+    Универсальная функция для поиска пользователя по заданному полю.
+    Пример: get_user_by_field('username', 'john')
+    """
+    from app.database import User
+    if hasattr(User, field):
+        return User.query.filter(getattr(User, field) == value).first()
+    else:
+        raise AttributeError(f"User has no field '{field}'")
+
 
 def get_all_users(include_password_hash=False, filter_admins=False):
     """
@@ -112,22 +123,6 @@ def verify_password(username, password):
     password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
     return password_hash == user.password_hash
 
-
-def verify_jwt(token, secret_key):
-    """
-    Проверяет JWT токен.
-
-    :param token: JWT токен.
-    :param secret_key: Секретный ключ для проверки подписи.
-    :return: Payload токена, если он действителен, иначе сообщение об ошибке.
-    """
-    try:
-        payload = jwt.decode(token, secret_key, algorithms=['HS256'])
-        return payload
-    except jwt.ExpiredSignatureError:
-        return "Токен истёк."
-    except jwt.InvalidTokenError:
-        return "Неверный токен."
 
 
 def change_password(username, old_password, new_password):
