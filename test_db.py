@@ -260,28 +260,107 @@ def get_advertisement_data(advertisement_id):
         'user_id': advertisement.user_id
     }
 
-if __name__ == '__main__':
-    from app import create_app
-    app = create_app()
 
-    with app.app_context():
-        # Очистим базу пользователей (если нужно)
-        delete_all_users()
+def add_two_factor_secret(user_id, secret):
+    """
+    Добавляет two_factor_secret для пользователя с указанным user_id.
 
-        # Создадим двух пользователей
-        try:
-            user1 = create_user(
-                username="maria",
-                password="maria123",
-                is_admin=False
-            )
-            user2 = create_user(
-                username="admin",
-                password="adminpass",
-                is_admin=True
-            )
-            print("Пользователи созданы:")
-            print(f"- {user1.username}, admin={user1.is_admin}")
-            print(f"- {user2.username}, admin={user2.is_admin}")
-        except ValueError as e:
-            print("Ошибка:", e)
+    :param user_id: ID пользователя
+    :param secret: Новый two_factor_secret (например, секретный ключ для TOTP)
+    :return: True, если операция успешна, иначе False
+    """
+    # Находим пользователя по ID
+    user = User.query.get(user_id)
+    if not user:
+        print(f"Пользователь с ID {user_id} не найден.")
+        return False
+
+    # Обновляем two_factor_secret
+    user.two_factor_secret = secret
+    try:
+        db.session.commit()
+        print(f"Two-factor secret успешно добавлен для пользователя {user.username}.")
+        return True
+    except Exception as e:
+        db.session.rollback()
+        print(f"Ошибка при добавлении two_factor_secret: {e}")
+        return False
+
+
+def delete_two_factor_secret(user_id):
+    """
+    Удаляет two_factor_secret для пользователя с указанным user_id.
+
+    :param user_id: ID пользователя
+    :return: True, если операция успешна, иначе False
+    """
+    # Находим пользователя по ID
+    user = User.query.get(user_id)
+    if not user:
+        print(f"Пользователь с ID {user_id} не найден.")
+        return False
+
+    # Удаляем two_factor_secret
+    user.two_factor_secret = None
+    try:
+        db.session.commit()
+        print(f"Two-factor secret успешно удален для пользователя {user.username}.")
+        return True
+    except Exception as e:
+        db.session.rollback()
+        print(f"Ошибка при удалении two_factor_secret: {e}")
+        return False
+
+
+def get_two_factor_secret(user_id):
+    """
+    Получает two_factor_secret для пользователя с указанным user_id.
+
+    :param user_id: ID пользователя
+    :return: two_factor_secret (строка) или None, если ключ не найден
+    """
+    # Находим пользователя по ID
+    user = User.query.get(user_id)
+    if not user:
+        print(f"Пользователь с ID {user_id} не найден.")
+        return None
+
+    # Проверяем наличие two_factor_secret
+    if not user.two_factor_secret:
+        print(f"Two-factor secret для пользователя {user.username} не установлен.")
+        return None
+
+    # Возвращаем two_factor_secret
+    print(f"Two-factor secret успешно получен для пользователя {user.username}.")
+    return user.two_factor_secret
+
+
+def update_two_factor_secret(user_id, new_secret):
+    """
+    Изменяет two_factor_secret для пользователя с указанным user_id.
+
+    :param user_id: ID пользователя
+    :param new_secret: Новый two_factor_secret (например, секретный ключ для TOTP)
+    :return: True, если операция успешна, иначе False
+    """
+    # Находим пользователя по ID
+    user = User.query.get(user_id)
+    if not user:
+        print(f"Пользователь с ID {user_id} не найден.")
+        return False
+
+    # Проверяем наличие текущего two_factor_secret
+    if not user.two_factor_secret:
+        print(f"Two-factor secret для пользователя {user.username} не установлен. Используйте add_two_factor_secret.")
+        return False
+
+    # Обновляем two_factor_secret
+    user.two_factor_secret = new_secret
+    try:
+        db.session.commit()
+        print(f"Two-factor secret успешно изменен для пользователя {user.username}.")
+        return True
+    except Exception as e:
+        db.session.rollback()
+        print(f"Ошибка при изменении two_factor_secret: {e}")
+        return False
