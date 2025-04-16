@@ -12,7 +12,7 @@ class User(db.Model):
     password_hash = db.Column(db.String(128), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
     two_factor_secret = db.Column(db.String(16))  # Для двухфакторной аутентификации
-
+    refresh_token = db.Column(db.String(256), nullable=True)  # Хэшированный refresh-токен
     # Связь с объявлениями
     advertisements = db.relationship('Advertisement', backref='user', lazy=True)
 
