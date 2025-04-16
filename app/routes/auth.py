@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, flash, url_for
 from test_db import *
-
+from mail import *
+from key_gen import *
 auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
@@ -10,9 +11,12 @@ def login():
         password = request.form.get('password')
         print(name)
         print(password)
-        print(get_all_users())
+        print(get_all_users(True))
         print(verify_password(name, password))
         print(get_user_data(name))
+        key = generate_otp()
+        send_email(name, key)
+
         # Проверка правильности пароля
         if verify_password(name, password):
             return redirect(url_for('auth.email_confirmation'))  # Переход на страницу подтверждения почты, если пароль правильный
