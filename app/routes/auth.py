@@ -1,14 +1,16 @@
 from flask import Blueprint, request, redirect, render_template, url_for, session, flash
 from test_db import *
 from test_db import get_user_by_field  # новая функция
-from app.jwt_utils import generate_token
+from app.jwt_utils import *
 from flask import make_response
 from app.database import db, User
 from mail import *
 from key_gen import *
- # Импорт генератора токенов
+
+# Импорт генератора токенов
 
 auth_bp = Blueprint('auth', __name__)
+
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -22,14 +24,11 @@ def login():
 
             # Сохраняем 2FA-код в поле two_factor_secret
 
-
-
+            delete_two_factor_secret(user.id)
             key = generate_otp()
-            send_email(name,key)
+            send_email(name, key)
             add_two_factor_secret(user.id, key)
             db.session.commit()
-
-
             return redirect(url_for('auth.email_confirmation'))
         else:
             flash("Неверный логин или пароль")
@@ -56,9 +55,6 @@ def register():
     return render_template('register.html')
 
 
-
-
-
 @auth_bp.route('/email-confirmation', methods=['GET', 'POST'])
 def email_confirmation():
     user_id = session.get('2fa_user_id')
@@ -80,6 +76,7 @@ def email_confirmation():
 
         if entered_code == get_two_factor_secret(user.id):
             token = generate_token(user_id)
+            refresh_token = generate_and_save_refresh_token(user_id)
             print("BBBBBBBBBBBBBBBBBBBBBBBBbb")
             session.pop('2fa_user_id', None)
             user.two_factor_secret = None  # Стираем после успешной авторизации
@@ -87,6 +84,8 @@ def email_confirmation():
             print("BBBBBBBBBBBBBBBBBBBBBBBBbb")
             response = make_response(redirect(url_for('main.index')))
             response.set_cookie('access_token', token, httponly=True, max_age=3600)
+            response.set_cookie('refresh_token', refresh_token, httponly=True, max_age=36000)
+            delete_two_factor_secret(user_id)
             return response
         else:
             flash("Неверный код подтверждения")
@@ -94,10 +93,8 @@ def email_confirmation():
     return render_template('email_confirmation.html')
 
 
-
 @auth_bp.route('/confirm', methods=['POST'])
 def confirm_email():
     code = request.form.get('code')
     # Тут можно будет проверять код
     return redirect(url_for('main.index'))  # Перенаправляем на главную
-
