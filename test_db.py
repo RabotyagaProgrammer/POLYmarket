@@ -35,6 +35,17 @@ def create_user(username, password, is_admin=False, two_factor_secret=None):
 
     return new_user
 
+def get_user_by_field(field, value):
+    """
+    Универсальная функция для поиска пользователя по заданному полю.
+    Пример: get_user_by_field('username', 'john')
+    """
+    from app.database import User
+    if hasattr(User, field):
+        return User.query.filter(getattr(User, field) == value).first()
+    else:
+        raise AttributeError(f"User has no field '{field}'")
+
 
 def get_all_users(include_password_hash=False, filter_admins=False):
     """

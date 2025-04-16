@@ -1,5 +1,10 @@
-from flask import Blueprint, render_template, request, redirect, flash, url_for
+from flask import Blueprint, request, redirect, render_template, url_for, session, flash
 from test_db import *
+from test_db import get_user_by_field  # новая функция
+from app.jwt_utils import generate_token
+from flask import make_response
+from app.database import db, User
+ # Импорт генератора токенов
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -8,18 +13,26 @@ def login():
     if request.method == 'POST':
         name = request.form.get('name')
         password = request.form.get('password')
-        print(name)
-        print(password)
         print(get_all_users())
-        print(verify_password(name, password))
-        print(get_user_data(name))
-        # Проверка правильности пароля
-        if verify_password(name, password):
-            return redirect(url_for('auth.email_confirmation'))  # Переход на страницу подтверждения почты, если пароль правильный
+        user = get_user_by_field('username', name)
+        if user and verify_password(name, password):
+            session['2fa_user_id'] = user.id
+
+            # Сохраняем 2FA-код в поле two_factor_secret
+            test_code = '123456'
+            user.two_factor_secret = test_code
+            print(user.two_factor_secret)
+            db.session.commit()
+            print(get_all_users())
+            print(f"Отправка кода 2FA: {test_code} (на почту)")
+
+            return redirect(url_for('auth.email_confirmation'))
         else:
-            flash("Неверный логин или пароль!", "error")  # Если пароль неверный, выводим ошибку
+            flash("Неверный логин или пароль")
 
     return render_template('login.html')
+
+
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -41,9 +54,41 @@ def register():
 
 
 
-@auth_bp.route('/email-confirmation', methods=['GET'])
+
+@auth_bp.route('/email-confirmation', methods=['GET', 'POST'])
 def email_confirmation():
+    user_id = session.get('2fa_user_id')
+    if not user_id:
+        flash("Сессия истекла. Пожалуйста, войдите снова.")
+        return redirect(url_for('auth.login'))
+
+    user = User.query.get(user_id)
+    print(user.two_factor_secret)
+    if not user:
+        flash("Пользователь не найден.")
+        print("BBBBBBBBBBBBBBBBBBBBBBBBbb")
+        return redirect(url_for('auth.login'))
+
+    if request.method == 'POST':
+        entered_code = request.form.get('code')
+        print("BBBBBBBBBBBBBBBBBBBBBBBBbb")
+        print(entered_code)
+
+        if entered_code == user.two_factor_secret:
+            token = generate_token(user_id)
+            print("BBBBBBBBBBBBBBBBBBBBBBBBbb")
+            session.pop('2fa_user_id', None)
+            user.two_factor_secret = None  # Стираем после успешной авторизации
+            db.session.commit()
+            print("BBBBBBBBBBBBBBBBBBBBBBBBbb")
+            response = make_response(redirect(url_for('main.index')))
+            response.set_cookie('access_token', token, httponly=True, max_age=3600)
+            return response
+        else:
+            flash("Неверный код подтверждения")
+
     return render_template('email_confirmation.html')
+
 
 
 @auth_bp.route('/confirm', methods=['POST'])
