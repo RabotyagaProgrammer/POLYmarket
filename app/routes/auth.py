@@ -4,6 +4,8 @@ from test_db import get_user_by_field  # новая функция
 from app.jwt_utils import generate_token
 from flask import make_response
 from app.database import db, User
+from mail import *
+from key_gen import *
  # Импорт генератора токенов
 
 auth_bp = Blueprint('auth', __name__)
@@ -19,12 +21,14 @@ def login():
             session['2fa_user_id'] = user.id
 
             # Сохраняем 2FA-код в поле two_factor_secret
-            test_code = '123456'
-            user.two_factor_secret = test_code
-            print(user.two_factor_secret)
+
+
+
+            key = generate_otp()
+            send_email(name,key)
+            add_two_factor_secret(user.id, key)
             db.session.commit()
-            print(get_all_users())
-            print(f"Отправка кода 2FA: {test_code} (на почту)")
+
 
             return redirect(url_for('auth.email_confirmation'))
         else:
@@ -74,7 +78,7 @@ def email_confirmation():
         print("BBBBBBBBBBBBBBBBBBBBBBBBbb")
         print(entered_code)
 
-        if entered_code == user.two_factor_secret:
+        if entered_code == get_two_factor_secret(user.id):
             token = generate_token(user_id)
             print("BBBBBBBBBBBBBBBBBBBBBBBBbb")
             session.pop('2fa_user_id', None)
