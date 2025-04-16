@@ -1,5 +1,5 @@
 from flask import Flask
-from .database import db  # импорт SQLAlchemy и моделей
+from app.database import db  # импорт SQLAlchemy и моделей
 
 def create_app():
     app = Flask(__name__)
