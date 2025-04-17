@@ -25,6 +25,16 @@ def index():
     # Если refresh_token действителен, проверяем access_token
     token = request.cookies.get('access_token')
     if not token:
+        if refresh_token:
+            try:
+                # Декодируем access_token
+                payload = jwt.decode(refresh_token, 'your_secret_key', algorithms=['HS256'])
+                user_id = payload.get('user_id')
+                refresh_access_token(user_id,refresh_token)
+            except (ExpiredSignatureError, InvalidTokenError, ValueError) as e:
+                print("Ошибка JWT:", e)
+                return redirect(url_for('auth.login'))
+
         print("ассес-токен недействителен или отсутствует.")
         return redirect(url_for('auth.login'))
 

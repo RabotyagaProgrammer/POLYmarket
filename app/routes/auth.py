@@ -18,7 +18,7 @@ def login():
         name = request.form.get('name')
         password = request.form.get('password')
         print(get_all_users())
-        user = get_user_by_field('name', name)
+        user = get_user_by_field('username', name)
         if user and verify_password(name, password):
             session['2fa_user_id'] = user.id
 
@@ -47,10 +47,21 @@ def register():
         if password != confirm:
             flash('Пароли не совпадают')
             return redirect(url_for('auth.register'))
-
-        # Здесь позже будет логика создания пользователя и отправки email
-
-        return redirect(url_for('auth.email_confirmation'))
+        delete_user(2)
+        if create_user(email, password, False, None, None):
+            user = get_user_by_field('username', email)
+            session['2fa_user_id'] = user.id
+            print(name)
+            id_tmp = user.id
+            key = generate_otp()
+            send_email(email, key)
+            add_two_factor_secret(id_tmp, key)
+            # Здесь позже будет логика создания пользователя и отправки email
+            db.session.commit()
+            return redirect(url_for('auth.email_confirmation'))
+        else:
+            flash('Такой пользователь уже существует')
+            return redirect(url_for('auth.register'))
 
     return render_template('register.html')
 

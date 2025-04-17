@@ -39,6 +39,7 @@ def create_user(username, password, is_admin=False, two_factor_secret=None, refr
 
     return new_user
 
+
 def get_user_by_field(field, value):
     """
     Универсальная функция для поиска пользователя по заданному полю.
@@ -122,7 +123,6 @@ def verify_password(username, password):
     # Хэшируем введённый пароль и сравниваем с хэшем из базы данных
     password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
     return password_hash == user.password_hash
-
 
 
 def change_password(username, old_password, new_password):
@@ -365,8 +365,6 @@ def update_two_factor_secret(user_id, new_secret):
         db.session.rollback()
         print(f"Ошибка при изменении two_factor_secret: {e}")
         return False
-
-
 
 
 def create_refresh_token(user_id):
