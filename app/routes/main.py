@@ -64,6 +64,9 @@ def artem_gay():
 def check():
     print("check")
 
+def check2():
+    return 0
+
 @main_bp.route('/category/<category_name>')
 def category(category_name):
     return f"<h2>Категория: {category_name.capitalize()} (заглушка)</h2>"
