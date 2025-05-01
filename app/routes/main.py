@@ -61,6 +61,9 @@ def profile():
 def artem_gay():
     return"<h2>АТРЕМ ГЕЙ</h2>"
 
+def check():
+    print("check")
+
 @main_bp.route('/category/<category_name>')
 def category(category_name):
     return f"<h2>Категория: {category_name.capitalize()} (заглушка)</h2>"

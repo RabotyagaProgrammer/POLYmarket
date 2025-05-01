@@ -1,11 +1,11 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
+
 from app.database import db
 
 # Инициализация расширений без привязки к app (application factory)
 
-migrate = Migrate()
+
 
 
 def create_app():
@@ -21,7 +21,7 @@ def create_app():
 
     # Инициализация расширений
     db.init_app(app)
-    migrate.init_app(app, db)
+
 
     # Регистрация блюпринтов
     from .routes.auth import auth_bp
