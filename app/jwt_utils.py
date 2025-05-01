@@ -40,7 +40,7 @@ def generate_and_save_refresh_token(user_id):
     user.refresh_token = hashed_token
     try:
         db.session.commit()
-        print(f"Refresh-токен успешно создан для пользователя {user.username}.")
+        print(f"Refresh-токен успешно создан для пользователя {user.email}.")
         return refresh_token  # Возвращаем исходный токен для клиента
     except Exception as e:
         db.session.rollback()
@@ -60,7 +60,7 @@ def verify_refresh_token(user_id, provided_token):
 
     # Проверяем наличие refresh-токена
     if not user.refresh_token:
-        print(f"Refresh-токен для пользователя {user.username} не установлен.")
+        print(f"Refresh-токен для пользователя {user.email} не установлен.")
         return False
 
     # Хэшируем предоставленный токен
@@ -68,10 +68,10 @@ def verify_refresh_token(user_id, provided_token):
 
     # Сравниваем хэши
     if user.refresh_token == hashed_provided_token:
-        print(f"Refresh-токен для пользователя {user.username} верный.")
+        print(f"Refresh-токен для пользователя {user.email} верный.")
         return True
     else:
-        print(f"Refresh-токен для пользователя {user.username} неверный.")
+        print(f"Refresh-токен для пользователя {user.email} неверный.")
         return False
 
 
@@ -103,7 +103,7 @@ def delete_refresh_token(user_id):
     user.refresh_token = None
     try:
         db.session.commit()
-        print(f"Refresh-токен успешно удален для пользователя {user.username}.")
+        print(f"Refresh-токен успешно удален для пользователя {user.email}.")
         return True
     except Exception as e:
         db.session.rollback()

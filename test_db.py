@@ -6,27 +6,29 @@ import jwt
 
 
 # Добавление тестовых данных
-def create_user(username, password, is_admin=False, two_factor_secret=None, refresh_token=None):
+def create_user(email, name, password, is_admin=False, two_factor_secret=None, refresh_token=None):
     """
     Создает нового пользователя и сохраняет его в базу данных.
 
-    :param username: Логин пользователя (уникальный).
+    :param email: Логин пользователя (уникальный).
+    :param name: имя фамилия отчество пользователя
     :param password: Пароль пользователя в открытом виде.
     :param is_admin: Флаг администратора (по умолчанию False).
     :param two_factor_secret: Секретный ключ для двухфакторной аутентификации (опционально).
-    :param refresh_token: рефреш токен
+    :param refresh_token: Рефреш токен
     :return: Созданный объект User.
     """
     # Проверка, существует ли пользователь с таким username
-    if User.query.filter_by(username=username).first():
-        raise ValueError(f"Пользователь с логином '{username}' уже существует.")
+    if User.query.filter_by(email=email).first():
+        raise ValueError(f"Пользователь с логином '{email}' уже существует.")
 
     # Хэширование пароля с использованием SHA-256
     password_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
 
     # Создание нового пользователя
     new_user = User(
-        username=username,
+        email=email,
+        name=name,
         password_hash=password_hash,
         is_admin=is_admin,
         two_factor_secret=two_factor_secret,
@@ -69,7 +71,8 @@ def get_all_users(include_password_hash=False, filter_admins=False):
     for user in users:
         user_data = {
             'id': user.id,
-            'username': user.username,
+            'email': user.email,
+            'name': user.name,
             'is_admin': user.is_admin,
             'two_factor_secret': user.two_factor_secret,
             'refresh': user.refresh_token
@@ -159,7 +162,8 @@ def get_user_data(user_id):
 
     return {
         'id': user.id,
-        'username': user.username,
+        'username': user.email,
+
         'is_admin': user.is_admin,
         'two_factor_secret': user.two_factor_secret,
         'refresh': user.refresh_token
@@ -280,7 +284,7 @@ def add_two_factor_secret(user_id, secret):
     user.two_factor_secret = secret
     try:
         db.session.commit()
-        print(f"Two-factor secret успешно добавлен для пользователя {user.username}.")
+        print(f"Two-factor secret успешно добавлен для пользователя {user.email}.")
         return True
     except Exception as e:
         db.session.rollback()
@@ -305,7 +309,7 @@ def delete_two_factor_secret(user_id):
     user.two_factor_secret = None
     try:
         db.session.commit()
-        print(f"Two-factor secret успешно удален для пользователя {user.username}.")
+        print(f"Two-factor secret успешно удален для пользователя {user.email}.")
         return True
     except Exception as e:
         db.session.rollback()
@@ -328,11 +332,11 @@ def get_two_factor_secret(user_id):
 
     # Проверяем наличие two_factor_secret
     if not user.two_factor_secret:
-        print(f"Two-factor secret для пользователя {user.username} не установлен.")
+        print(f"Two-factor secret для пользователя {user.email} не установлен.")
         return None
 
     # Возвращаем two_factor_secret
-    print(f"Two-factor secret успешно получен для пользователя {user.username}.")
+    print(f"Two-factor secret успешно получен для пользователя {user.email}.")
     return user.two_factor_secret
 
 
@@ -352,14 +356,14 @@ def update_two_factor_secret(user_id, new_secret):
 
     # Проверяем наличие текущего two_factor_secret
     if not user.two_factor_secret:
-        print(f"Two-factor secret для пользователя {user.username} не установлен. Используйте add_two_factor_secret.")
+        print(f"Two-factor secret для пользователя {user.email} не установлен. Используйте add_two_factor_secret.")
         return False
 
     # Обновляем two_factor_secret
     user.two_factor_secret = new_secret
     try:
         db.session.commit()
-        print(f"Two-factor secret успешно изменен для пользователя {user.username}.")
+        print(f"Two-factor secret успешно изменен для пользователя {user.email}.")
         return True
     except Exception as e:
         db.session.rollback()
@@ -390,7 +394,7 @@ def create_refresh_token(user_id):
     user.refresh_token = hashed_token
     try:
         db.session.commit()
-        print(f"Refresh-токен успешно создан для пользователя {user.username}.")
+        print(f"Refresh-токен успешно создан для пользователя {user.email}.")
         return refresh_token  # Возвращаем исходный токен для клиента
     except Exception as e:
         db.session.rollback()
@@ -415,7 +419,7 @@ def delete_refresh_token(user_id):
     user.refresh_token = None
     try:
         db.session.commit()
-        print(f"Refresh-токен успешно удален для пользователя {user.username}.")
+        print(f"Refresh-токен успешно удален для пользователя {user.email}.")
         return True
     except Exception as e:
         db.session.rollback()
@@ -438,10 +442,10 @@ def get_refresh_token(user_id):
 
     # Проверяем наличие refresh-токена
     if not user.refresh_token:
-        print(f"Refresh-токен для пользователя {user.username} не установлен.")
+        print(f"Refresh-токен для пользователя {user.email} не установлен.")
         return None
 
-    print(f"Refresh-токен успешно получен для пользователя {user.username}.")
+    print(f"Refresh-токен успешно получен для пользователя {user.email}.")
     return user.refresh_token
 
 
@@ -461,7 +465,7 @@ def verify_refresh_token(user_id, provided_token):
 
     # Проверяем наличие refresh-токена
     if not user.refresh_token:
-        print(f"Refresh-токен для пользователя {user.username} не установлен.")
+        print(f"Refresh-токен для пользователя {user.email} не установлен.")
         return False
 
     # Хэшируем предоставленный токен
@@ -469,8 +473,8 @@ def verify_refresh_token(user_id, provided_token):
 
     # Сравниваем хэши
     if user.refresh_token == hashed_provided_token:
-        print(f"Refresh-токен для пользователя {user.username} верный.")
+        print(f"Refresh-токен для пользователя {user.email} верный.")
         return True
     else:
-        print(f"Refresh-токен для пользователя {user.username} неверный.")
+        print(f"Refresh-токен для пользователя {user.email} неверный.")
         return False

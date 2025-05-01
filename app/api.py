@@ -201,8 +201,8 @@ class UserResource(Resource):
         if user:
             return {
                 'id': user.id,
-                'username': user.username,
-                'email': user.username
+                'username': user.email,
+                'email': user.email
             }
         api.abort(404, "Пользователь не найден")
 
