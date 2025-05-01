@@ -151,7 +151,7 @@ def change_password(username, old_password, new_password):
 
 def get_user_data(user_id):
     """
-    Возвращает данные пользователя по ID.
+    Возвращает данные пользователя по ID, включая его объявления (вся информация об объявлениях).
 
     :param user_id: ID пользователя.
     :return: Словарь с данными пользователя или None, если пользователь не найден.
@@ -162,11 +162,24 @@ def get_user_data(user_id):
 
     return {
         'id': user.id,
-        'username': user.email,
-
+        'email': user.email,
+        'tg_contact': user.tg_contact,
+        'name': user.name,
         'is_admin': user.is_admin,
         'two_factor_secret': user.two_factor_secret,
-        'refresh': user.refresh_token
+        'refresh': user.refresh_token,
+        'advertisements': [
+            {
+                'id': ad.id,
+                'title': ad.title,
+                'description': ad.description,
+                'price': ad.price,
+                'images': ad.images,
+                'category': ad.category,
+                'user_id': ad.user_id
+            }
+            for ad in user.advertisements
+        ]
     }
 
 

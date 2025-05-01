@@ -9,10 +9,8 @@ db = SQLAlchemy()
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(80), unique=True, nullable=False)
-
     tg_contact = db.Column(db.String(80), unique=False, nullable=True)
     name = db.Column(db.String(80), unique=False, nullable=False)
-
     password_hash = db.Column(db.String(128), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
     two_factor_secret = db.Column(db.String(16))  # Для двухфакторной аутентификации

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Редактировать профиль</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        button {
+            margin-top: 25px;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+
+        a.back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a.back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Редактирование профиля</h2>
+
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+
+        <form method="POST">
+            <label for="name">Имя</label>
+            <input type="text" name="name" id="name" value="{{ user.name }}">
+
+            <label for="email">Email</label>
+            <input type="email" name="email" id="email" value="{{ user.email }}">
+
+            <label for="tg_contact">Telegram</label>
+            <input type="text" name="tg_contact" id="tg_contact" value="{{ user.tg_contact }}">
+
+            <h3>Сменить пароль</h3>
+
+            <label for="old_password">Старый пароль</label>
+            <input type="password" name="old_password" id="old_password">
+
+            <label for="new_password">Новый пароль</label>
+            <input type="password" name="new_password" id="new_password">
+
+            <button type="submit">Сохранить изменения</button>
+        </form>
+
+        <a href="{{ url_for('main.profile') }}" class="back-link">← Назад в профиль</a>
+    </div>
+
+</body>
+</html>

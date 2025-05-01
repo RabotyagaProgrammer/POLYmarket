@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Профиль пользователя</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            background-color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+        }
+
+        .logo {
+            font-size: 24px;
+            color: #28a745;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .container {
+            display: flex;
+            margin: 40px auto;
+            max-width: 1200px;
+            gap: 40px;
+        }
+
+        .profile-sidebar {
+            flex: 0 0 300px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .profile-icon {
+            font-size: 72px;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+
+        .profile-info {
+            font-size: 16px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .edit-btn {
+            margin-top: 20px;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            font-size: 15px;
+            transition: background-color 0.2s ease;
+        }
+
+        .edit-btn:hover {
+            background-color: #218838;
+        }
+
+        .ads-list {
+            flex: 1;
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .ads-list h2 {
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        .ads-list ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .ads-list li {
+            margin-bottom: 10px;
+        }
+
+        .ads-list a {
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        .ads-list a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <a href="{{ url_for('main.index') }}" class="logo">πolyMarket</a>
+</div>
+
+<div class="container">
+    <div class="profile-sidebar">
+        <div class="profile-icon">
+            <i class="fas fa-user-circle"></i>
+        </div>
+        <div class="profile-info">
+            <p><strong>Имя:</strong> {{ user.name }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Telegram:</strong> {{ user.tg_contact or "Не указано" }}</p>
+        </div>
+        <a href="{{ url_for('main.edit_profile') }}">
+            <button class="edit-btn">Редактировать профиль</button>
+        </a>
+    </div>
+
+    <div class="ads-list">
+        <h2>Мои объявления</h2>
+        {% if user.advertisements %}
+            <ul>
+                {% for ad in user.advertisements %}
+                    <li>
+                        <a href="{{ url_for('main.view_ad', ad_id=ad.id) }}">{{ ad.title }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>У вас пока нет объявлений.</p>
+        {% endif %}
+    </div>
+</div>
+
+</body>
+</html>
