@@ -119,7 +119,7 @@ def verify_password(username, password):
     :return: True, если пароль верный, иначе False.
     """
     # Находим пользователя по логину
-    user = User.query.filter_by(username=username).first()
+    user = User.query.filter_by(email=username).first()
     if not user:
         return False  # Пользователь не найден
 
@@ -137,7 +137,7 @@ def change_password(username, old_password, new_password):
     :param new_password: Новый пароль.
     :return: True, если пароль изменён, иначе False.
     """
-    user = User.query.filter_by(username=username).first()
+    user = User.query.filter_by(email=username).first()
     if not user:
         return False
 

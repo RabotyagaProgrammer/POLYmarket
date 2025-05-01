@@ -8,6 +8,6 @@ with app.app_context():
     db.create_all()  # создаст таблицы, если их нет
     delete_all_users()
   
-    create_user('lobastiyartem@gmail.com', 'maria123', False)
+    create_user('lobastiyartem@gmail.com', 'maria123', 'maria123',False)
 if __name__ == '__main__':
     app.run(debug=True)
