@@ -58,7 +58,8 @@ def index():
 @main_bp.route('/profile')
 def profile():
     return "<h2>Страница профиля (заглушка)</h2>"
-
+def artem_gay():
+    return"<h2>АТРЕМ ГЕЙ</h2>"
 
 @main_bp.route('/category/<category_name>')
 def category(category_name):
