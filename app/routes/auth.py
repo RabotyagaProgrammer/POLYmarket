@@ -104,6 +104,14 @@ def email_confirmation():
     return render_template('email_confirmation.html')
 
 
+@auth_bp.route('/logout', methods=['POST'])
+def logout():
+    response = make_response(redirect(url_for('auth.login')))
+    response.set_cookie('access_token', '', expires=0)
+    response.set_cookie('refresh_token', '', expires=0)
+    session.clear()
+    return response
+
 @auth_bp.route('/confirm', methods=['POST'])
 def confirm_email():
     code = request.form.get('code')

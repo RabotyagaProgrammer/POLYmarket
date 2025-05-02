@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ ad.title }}</title>
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        .ad-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .ad-price {
+            color: green;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+        .ad-images {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .ad-images img {
+            max-width: 300px;
+            height: auto;
+            border-radius: 6px;
+        }
+        .ad-description {
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+        .ad-owner {
+            font-size: 14px;
+            color: #555;
+            margin-top: 10px;
+        }
+        a {
+            text-decoration: none;
+            color: #007bff;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="ad-title">{{ ad.title }}</div>
+    <div class="ad-price">{{ ad.price }} ₽</div>
+
+    {% if ad.images %}
+        <div class="ad-images">
+            {% for image in ad.images %}
+                <img src="{{ image.url_path }}" alt="Изображение объявления" style="max-width: 300px;">
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Нет изображений.</p>
+    {% endif %}
+
+    <div class="ad-description">{{ ad.description }}</div>
+
+    <div class="ad-owner">
+        Владелец: <a href="#">{{ owner.name }}</a>
+    </div>
+
+    <a href="{{ url_for('main.index') }}">← Назад к главной</a>
+</div>
+
+</body>
+</html>

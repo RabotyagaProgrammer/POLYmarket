@@ -1,5 +1,5 @@
-from flask import Blueprint, request, redirect, url_for, render_template, current_app, make_response
-from test_db import get_user_data  # Импорт функции из твоего модуля
+from flask import Blueprint, request, redirect, url_for, render_template, current_app, make_response, flash
+from test_db import get_user_data, change_password,get_all_advertisements  # Импорт функции из твоего модуля
 from jwt import ExpiredSignatureError, InvalidTokenError
 import jwt
 from app.jwt_utils import *
@@ -47,26 +47,24 @@ def index():
         user_data = get_user_data(user_id)
         if not user_data:
             raise ValueError("Пользователь не найден")
+        advertisements = get_all_advertisements()
 
-        return render_template('index.html', username=user_data['username'])
+        # Передаем данные в шаблон
+
+
+        return render_template('index.html', username=user_data['email'], is_admin=user_data['is_admin'],advertisements=advertisements)
+
 
     except (ExpiredSignatureError, InvalidTokenError, ValueError) as e:
         print("Ошибка JWT:", e)
         return redirect(url_for('auth.login'))
 
 
-@main_bp.route('/profile')
-def profile():
-    return "<h2>Страница профиля (заглушка)</h2>"
-def artem_gay():
-    return"<h2>АТРЕМ ГЕЙ</h2>"
-
-def check():
-    print("check")
-
-def check2():
-    return 0
-
 @main_bp.route('/category/<category_name>')
 def category(category_name):
     return f"<h2>Категория: {category_name.capitalize()} (заглушка)</h2>"
+
+
+
+
+
