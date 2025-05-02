@@ -49,7 +49,7 @@ def register():
             return redirect(url_for('auth.register'))
         delete_user(2)
         if create_user(email, name,  password, False, None, None):
-            user = get_user_by_field('username', email)
+            user = get_user_by_field('email', email)
             session['2fa_user_id'] = user.id
             print(name)
             id_tmp = user.id

@@ -24,7 +24,7 @@ class Advertisement(db.Model):
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=False)
     price = db.Column(db.Float, nullable=False)
-    images = db.Column(db.JSON)  # Массив ссылок на изображения
+    #images = db.Column(db.JSON)  # Массив ссылок на изображения
     category = db.Column(db.String(50))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))  # Связь с пользователем
     images = db.relationship('Image', backref='advertisement', lazy=True, cascade="all, delete-orphan")

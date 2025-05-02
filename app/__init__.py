@@ -28,6 +28,7 @@ def create_app():
     from .routes.main import main_bp
     from .api import api_bp
     from .routes.admin_routes import  admin_bp
+    from .routes.search import search_bp
     from .routes.profile_routes import profile_bp
     from .routes.advertisment import advertisement_bp
 
@@ -37,6 +38,7 @@ def create_app():
     app.register_blueprint(admin_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
+    app.register_blueprint(search_bp)
     app.register_blueprint(api_bp, url_prefix='/api')
 
     return app
