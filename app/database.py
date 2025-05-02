@@ -27,3 +27,12 @@ class Advertisement(db.Model):
     images = db.Column(db.JSON)  # Массив ссылок на изображения
     category = db.Column(db.String(50))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))  # Связь с пользователем
+    images = db.relationship('Image', backref='advertisement', lazy=True, cascade="all, delete-orphan")
+
+
+class Image(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    advertisement_id = db.Column(db.Integer, db.ForeignKey('advertisement.id'), nullable=False)
+    filename = db.Column(db.String(255), nullable=False)  # Имя файла на диске
+    url_path = db.Column(db.String(500), nullable=False)  # Полный путь для <img src="">
+    is_main = db.Column(db.Boolean, default=False)  # Основное изображение объявления

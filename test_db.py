@@ -147,7 +147,24 @@ def change_password(username, old_password, new_password):
     user.password_hash = hashlib.sha256(new_password.encode('utf-8')).hexdigest()
     db.session.commit()
     return True
-
+def get_all_advertisements():
+    """
+    Возвращает список всех объявлений.
+    :return: Список словарей с данными объявлений.
+    """
+    ads = Advertisement.query.all()
+    result = []
+    for ad in ads:
+        result.append({
+            'id': ad.id,
+            'title': ad.title,
+            'description': ad.description,
+            'price': ad.price,
+            'images': ad.images,
+            'category': ad.category,
+            'user_id': ad.user_id
+        })
+    return result
 
 def get_user_data(user_id):
     """

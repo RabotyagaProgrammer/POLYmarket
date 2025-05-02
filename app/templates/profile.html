@@ -30,6 +30,18 @@
             text-decoration: none;
         }
 
+        .logout-form {
+            margin: 0;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #dc3545;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
         .container {
             display: flex;
             margin: 40px auto;
@@ -110,6 +122,9 @@
 
 <div class="navbar">
     <a href="{{ url_for('main.index') }}" class="logo">πolyMarket</a>
+    <form method="POST" action="{{ url_for('auth.logout') }}" class="logout-form">
+        <button type="submit" class="logout-btn">Выйти</button>
+    </form>
 </div>
 
 <div class="container">
@@ -122,25 +137,37 @@
             <p><strong>Email:</strong> {{ user.email }}</p>
             <p><strong>Telegram:</strong> {{ user.tg_contact or "Не указано" }}</p>
         </div>
-        <a href="{{ url_for('main.edit_profile') }}">
+        <a href="{{ url_for('profile.edit_profile') }}">
             <button class="edit-btn">Редактировать профиль</button>
         </a>
     </div>
 
     <div class="ads-list">
-        <h2>Мои объявления</h2>
-        {% if user.advertisements %}
-            <ul>
-                {% for ad in user.advertisements %}
-                    <li>
-                        <a href="{{ url_for('main.view_ad', ad_id=ad.id) }}">{{ ad.title }}</a>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p>У вас пока нет объявлений.</p>
-        {% endif %}
-    </div>
+    <h2>Мои объявления</h2>
+    {% if user.advertisements %}
+        <ul>
+            {% for ad in user.advertisements %}
+                <li style="display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <a href="{{ url_for('advert.ad_detail', ad_id=ad.id) }}">{{ ad.title }}</a>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('advert.edit_ad', ad_id=ad.id) }}" title="Редактировать">
+                            <i class="fas fa-edit" style="color: #007bff; margin-right: 10px;"></i>
+                        </a>
+                        <form method="POST" action="{{ url_for('advert.delete_ad', ad_id=ad.id) }}" style="display:inline;">
+                            <button type="submit" title="Удалить" style="background:none; border:none; cursor:pointer;">
+                                <i class="fas fa-trash-alt" style="color: #dc3545;"></i>
+                            </button>
+                        </form>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>У вас пока нет объявлений.</p>
+    {% endif %}
+</div>
 </div>
 
 </body>

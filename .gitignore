@@ -1,0 +1,6 @@
+
+
+__pycache__/
+.idea/
+app/routes/__pycache__/
+app/__pycache__/
