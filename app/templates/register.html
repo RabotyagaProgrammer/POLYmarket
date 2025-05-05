@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Регистрация</title>
+    <title>{{ 'Добавить пользователя' if is_admin_page else 'Регистрация' }}</title>
     <style>
         body {
             margin: 0;
@@ -41,6 +41,18 @@
             font-size: 16px;
         }
 
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .checkbox-container {
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
         button {
             width: 100%;
             padding: 12px;
@@ -66,8 +78,8 @@
 </head>
 <body>
 
-    <form class="register-container" method="POST" action="{{ url_for('auth.register') }}">
-        <h2>Регистрация</h2>
+    <form class="register-container" method="POST">
+        <h2>{{ 'Добавить пользователя' if is_admin_page else 'Регистрация' }}</h2>
 
         {% with messages = get_flashed_messages() %}
           {% if messages %}
@@ -80,7 +92,15 @@
         <input type="password" name="password" placeholder="Пароль" required>
         <input type="password" name="confirm_password" placeholder="Повторите пароль" required>
 
-        <button type="submit">Зарегистрироваться</button>
+        {% if is_admin_page %}
+        <div class="checkbox-container">
+            <label>
+                <input type="checkbox" name="is_admin"> Администратор
+            </label>
+        </div>
+        {% endif %}
+
+        <button type="submit">{{ 'Добавить' if is_admin_page else 'Зарегистрироваться' }}</button>
     </form>
 
 </body>

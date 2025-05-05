@@ -6,7 +6,7 @@ app = create_app()
 
 with app.app_context():
     db.create_all()  # создаст таблицы, если их нет
-    #delete_all_users()
+    # delete_all_users()
     # ads_data = [
     #     {
     #         "title": "Продаю велосипед",
@@ -35,7 +35,7 @@ with app.app_context():
     #         category=ad["category"]
     #     )
 
-    #create_user('admin@gmail.com', 'admin', 'admin',True)
+    # create_user('admin@gmail.com', 'admin', 'admin',True)
 if __name__ == '__main__':
     app.run(debug=True)
 
