@@ -58,4 +58,4 @@ jobs:
         run: pip install bandit
 
       - name: Run Bandit
-        run: bandit -r . -f github
+        run: bandit -r . -f json -o bandit.json:contentReference[oaicite:61]{index=61}
