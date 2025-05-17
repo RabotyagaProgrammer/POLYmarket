@@ -12,40 +12,42 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Клонируем репозиторий
+      # 1. Клонируем код
       - name: Checkout code
-        uses: actions/checkout@v4  # установка кода в рабочую директорию :contentReference[oaicite:0]{index=0}
+        uses: actions/checkout@v4  # :contentReference[oaicite:6]{index=6}
 
-      # 2. Устанавливаем Python и кешируем pip-зависимости
+      # 2. Устанавливаем Python с кешем pip
       - name: Set up Python
-        uses: actions/setup-python@v4  # установка Python версии 3.11 :contentReference[oaicite:1]{index=1}
+        uses: actions/setup-python@v4  # :contentReference[oaicite:7]{index=7}
         with:
           python-version: '3.11'
           cache: 'pip'
 
-      # 3. Устанавливаем зависимости
+      # 3. Обновляем pip и устанавливаем зависимости
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements.txt  # убедитесь, что pytest в requirements :contentReference[oaicite:8]{index=8}
 
-      # 4. Запуск тестов (если есть)
+      # 4. (Альтернативно) Явная установка pytest
+      - name: Install pytest
+        if: always()
+        run: pip install pytest  # :contentReference[oaicite:9]{index=9}
+
+      # 5. Запуск тестов через модуль pytest
       - name: Run tests
-        run: |
-          pytest --maxfail=1 --disable-warnings -q
+        run: python -m pytest --maxfail=1 --disable-warnings -q  # :contentReference[oaicite:10]{index=10}
 
-      # 5. Сборка Docker-образа веб-приложения
+      # 6. Сборка Docker-образа (если нужно)
       - name: Build Docker image
-        run: |
-          docker build -t myapp:${{ github.sha }} .
+        run: docker build -t myapp:${{ github.sha }} .  # опционально
 
-      # 6. Сохраняем Docker-образ в артефакты (как tar)
-      - name: Save Docker image artifact
-        run: |
-          docker save myapp:${{ github.sha }} | gzip > myapp_${{ github.sha }}.tar.gz
+      # 7. Сохранение Docker-образа
+      - name: Save Docker image
+        run: docker save myapp:${{ github.sha }} | gzip > myapp_${{ github.sha }}.tar.gz
 
-      - name: Upload Docker image
-        uses: actions/upload-artifact@v4  # архивирование артефактов :contentReference[oaicite:2]{index=2}
+      - name: Upload Docker image artifact
+        uses: actions/upload-artifact@v4  # :contentReference[oaicite:11]{index=11}
         with:
           name: docker-image
           path: myapp_${{ github.sha }}.tar.gz
@@ -56,14 +58,11 @@ jobs:
     needs: build
 
     steps:
-      # Повторно клонируем код в security job
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Устанавливаем Bandit
       - name: Install Bandit
-        run: pip install bandit
+        run: pip install bandit  # :contentReference[oaicite:12]{index=12}
 
-      # Запускаем статический анализ
       - name: Run Bandit
-        run: bandit -r . -f github  # формат отчёта GitHub Checks :contentReference[oaicite:3]{index=3}
+        run: bandit -r . -f github
