@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Пользователи — Админ-панель</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f7f7f7;
+        }
+
+        a.action-link {
+            margin-right: 10px;
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        a.action-link:hover {
+            text-decoration: underline;
+        }
+
+        a.delete-link {
+            color: red;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .btn-add-user {
+        display: inline-block;
+        margin-bottom: 20px;
+        padding: 10px 20px;
+        background-color: #28a745;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+    }
+
+    .btn-add-user:hover {
+        background-color: #218838;
+    }
+    </style>
+</head>
+<body>
+<a href="{{ url_for('admin.add_user') }}" class="btn-add-user">Добавить пользователя</a>
+<div class="container">
+    <h2>Список пользователей</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Email</th>
+                <th>Имя</th>
+                <th>Telegram</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.name }}</td>
+                <td>{{ user.tg_contact or "-" }}</td>
+                <td>
+                    <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="action-link">Редактировать</a>
+                    <a href="{{ url_for('admin.delete_user', user_id=user.id) }}" class="action-link delete-link" onclick="return confirm('Вы уверены, что хотите удалить этого пользователя?');">Удалить</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ url_for('admin.admin_panel') }}" class="back-link">← Назад в панель администратора</a>
+</div>
+
+</body>
+</html>

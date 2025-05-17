@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Редактировать объявление</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 60px auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        textarea {
+            resize: vertical;
+            height: 100px;
+        }
+
+        button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .image-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .image-preview .image-item {
+            position: relative;
+        }
+
+        .image-preview img {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: cover;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .custom-file-upload {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-block;
+            font-size: 14px;
+        }
+
+        .custom-file-upload:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Редактировать объявление</h2>
+    <form id="editForm" method="post" enctype="multipart/form-data">
+        <label for="title">Заголовок:</label>
+        <input type="text" id="title" name="title" value="{{ ad.title }}" required>
+
+        <label for="description">Описание:</label>
+        <textarea id="description" name="description" required>{{ ad.description }}</textarea>
+
+        <label for="price">Цена (₽):</label>
+        <input type="number" id="price" name="price" step="0.01" min="0" value="{{ ad.price }}" required>
+
+        <label for="category">Категория:</label>
+        <select id="category" name="category" required>
+            <option value="">Выберите категорию</option>
+            <option value="tech" {% if ad.category == 'tech' %}selected{% endif %}>Техника</option>
+            <option value="clothes" {% if ad.category == 'clothes' %}selected{% endif %}>Одежда</option>
+            <option value="books" {% if ad.category == 'books' %}selected{% endif %}>Книги</option>
+            <option value="food" {% if ad.category == 'food' %}selected{% endif %}>Продукты</option>
+            <option value="home" {% if ad.category == 'home' %}selected{% endif %}>Хозтовары</option>
+        </select>
+
+        <label>Текущие фото:</label>
+        <div class="image-preview" id="currentImages">
+            {% for image in ad.images %}
+                <div class="image-item" data-image-id="{{ image.id }}">
+                    <img src="{{ image.url_path }}" alt="Фото объявления">
+                    <button type="button" class="delete-btn" onclick="deleteImage({{ image.id }}, this)">&times;</button>
+                </div>
+            {% endfor %}
+        </div>
+
+        <label>Добавить новые фото:</label>
+        <div class="file-input-wrapper">
+            <input type="file" id="images" name="images" multiple accept="image/*">
+            <span class="custom-file-upload">Выбрать фото</span>
+        </div>
+
+        <div class="image-preview" id="newImagePreview"></div>
+
+        <button type="submit">Сохранить изменения</button>
+    </form>
+</div>
+
+<script>
+    const fileInput = document.getElementById('images');
+    const newImagePreview = document.getElementById('newImagePreview');
+
+    // Просмотр новых изображений
+    fileInput.addEventListener('change', function () {
+        newImagePreview.innerHTML = '';
+        const files = fileInput.files;
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+
+        if (!files.length) return;
+
+        Array.from(files).forEach(file => {
+            if (!allowedTypes.includes(file.type)) {
+                alert(`Файл "${file.name}" не является изображением.`);
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.maxWidth = '100px';
+                img.style.maxHeight = '100px';
+                img.style.borderRadius = '4px';
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = '×';
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.onclick = () => {
+                    newImagePreview.removeChild(imgWrapper);
+                };
+
+                const imgWrapper = document.createElement('div');
+                imgWrapper.className = 'image-item';
+                imgWrapper.appendChild(img);
+                imgWrapper.appendChild(deleteBtn);
+
+                newImagePreview.appendChild(imgWrapper);
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+
+    // Удаление текущего изображения
+    function deleteImage(imageId, button) {
+        const imageItem = button.closest('.image-item');
+        fetch(`/delete_image/${imageId}`, { method: 'POST' })
+            .then(response => {
+                if (response.ok) {
+                    imageItem.remove();
+                } else {
+                    alert('Не удалось удалить изображение.');
+                }
+            })
+            .catch(() => alert('Ошибка при удалении изображения.'));
+    }
+
+    // Перенаправление после сохранения
+    document.getElementById('editForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+
+        fetch(this.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url; // Перенаправление на страницу профиля
+            } else {
+                alert('Изменения сохранены!');
+            }
+        })
+        .catch(error => console.error('Ошибка:', error));
+    });
+</script>
+
+</body>
+</html>
