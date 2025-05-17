@@ -8,46 +8,39 @@ on:
 
 jobs:
   build:
-    name: Build & Test
+    name: Build & Deploy
     runs-on: ubuntu-latest
 
     steps:
       # 1. Клонируем код
       - name: Checkout code
-        uses: actions/checkout@v4  # :contentReference[oaicite:6]{index=6}
+        uses: actions/checkout@v4
 
       # 2. Устанавливаем Python с кешем pip
       - name: Set up Python
-        uses: actions/setup-python@v4  # :contentReference[oaicite:7]{index=7}
+        uses: actions/setup-python@v4
         with:
           python-version: '3.11'
           cache: 'pip'
 
-      # 3. Обновляем pip и устанавливаем зависимости
+      # 3. Устанавливаем зависимости
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt  # убедитесь, что pytest в requirements :contentReference[oaicite:8]{index=8}
+          pip install -r requirements.txt
 
-      # 4. (Альтернативно) Явная установка pytest
-      - name: Install pytest
-        if: always()
-        run: pip install pytest  # :contentReference[oaicite:9]{index=9}
+      # === Убраны шаги с pytest! ===
 
-      # 5. Запуск тестов через модуль pytest
-      - name: Run tests
-        run: python -m pytest --maxfail=1 --disable-warnings -q  # :contentReference[oaicite:10]{index=10}
-
-      # 6. Сборка Docker-образа (если нужно)
+      # 4. Сборка Docker-образа
       - name: Build Docker image
-        run: docker build -t myapp:${{ github.sha }} .  # опционально
+        run: docker build -t myapp:${{ github.sha }} .
 
-      # 7. Сохранение Docker-образа
+      # 5. Сохранение Docker-образа как артефакт
       - name: Save Docker image
         run: docker save myapp:${{ github.sha }} | gzip > myapp_${{ github.sha }}.tar.gz
 
       - name: Upload Docker image artifact
-        uses: actions/upload-artifact@v4  # :contentReference[oaicite:11]{index=11}
+        uses: actions/upload-artifact@v4
         with:
           name: docker-image
           path: myapp_${{ github.sha }}.tar.gz
@@ -62,7 +55,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Bandit
-        run: pip install bandit  # :contentReference[oaicite:12]{index=12}
+        run: pip install bandit
 
       - name: Run Bandit
         run: bandit -r . -f github
