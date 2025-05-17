@@ -53,7 +53,7 @@ jobs:
       # Установка Bandit
       - name: Install Bandit
         run: pip install bandit
-
+      # Запуск анализа кода с отчетом в формате GitHub# Запуск анализа кода с отчетом в формате GitHub# Запуск анализа кода с отчетом в формате GitHub# Запуск анализа кода с отчетом в формате GitHub
       # Запуск анализа кода с отчетом в формате GitHub
       - name: Run Bandit security scan
         run: bandit -r . -f github
