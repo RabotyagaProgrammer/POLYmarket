@@ -2,9 +2,11 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>πolyMarket</title>
+    <title>Поиск объявлений</title>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- Подключение иконок Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
         body {
@@ -74,14 +76,12 @@
             text-align: center;
         }
 
-        .search-box {
+        /* Поисковая строка */
+         .search-box {
+            position: relative;
             width: 100%;
             max-width: 600px;
-            margin: 0 auto 20px;
-        }
-
-        .search-box form {
-            position: relative;
+            margin: 0 auto 40px;
         }
 
         .search-box input[type="text"] {
@@ -94,20 +94,20 @@
 
         .search-icon {
             position: absolute;
-            left: 14px;
+            left: 12px;
             top: 30%;
             transform: translateY(-50%);
             color: #888;
             font-size: 18px;
-            pointer-events: none;
         }
 
+        /* Фильтры по цене */
         .filters {
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 8px;
-            margin-top: 8px;
+            margin-top: 8px; /* чуть ниже поисковой строки */
             margin-bottom: 20px;
             flex-wrap: wrap;
         }
@@ -117,7 +117,7 @@
         }
 
         .filters input[type="number"] {
-            width: 70px;
+            width: 70px; /* уменьшенный размер */
             padding: 6px;
             font-size: 13px;
             border-radius: 6px;
@@ -136,12 +136,18 @@
             cursor: pointer;
         }
 
+        /* Категории */
+        .category-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
         .categories {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
             gap: 12px;
-            margin-bottom: 40px;
         }
 
         .category-btn {
@@ -160,14 +166,7 @@
             background-color: #0056b3;
         }
 
-        .section-title {
-            font-size: 20px;
-            font-weight: bold;
-            margin-top: 50px;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
+        /* Объявления */
         .ad-list {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -239,44 +238,63 @@
 </div>
 
 <div class="container">
-    <!-- Поисковая форма с фильтрами -->
+    <!-- Поиск -->
     <div class="search-box">
         <form action="{{ url_for('search.search') }}" method="GET">
             <i class="fas fa-search search-icon"></i>
-            <input type="text" name="q" placeholder="Поиск товаров..." value="{{ request.args.get('q', '') }}">
+            <input
+                type="text"
+                name="q"
+                placeholder="Поиск товаров..."
+                value="{{ query }}">
             <div class="filters">
                 <label>Цена от:</label>
-                <input type="number" step="1" name="min_price" value="{{ request.args.get('min_price', '') }}">
+                <input
+                    type="number"
+                    step="1"
+                    name="min_price"
+                    value="{{ min_price }}">
                 <label>до:</label>
-                <input type="number" step="1" name="max_price" value="{{ request.args.get('max_price', '') }}">
+                <input
+                    type="number"
+                    step="1"
+                    name="max_price"
+                    value="{{ max_price }}">
                 <button type="submit">Искать</button>
             </div>
         </form>
     </div>
 
     <!-- Категории -->
-    {% if all_categories %}
-        <div class="categories">
-            {% for cat in all_categories %}
-                <a href="{{ url_for('search.search', category=cat, min_price=request.args.get('min_price', ''), max_price=request.args.get('max_price', '')) }}" class="category-btn">{{ cat }}</a>
-            {% endfor %}
-            <a href="{{ url_for('search.search', min_price=request.args.get('min_price', ''), max_price=request.args.get('max_price', '')) }}" class="category-btn">Все категории</a>
-        </div>
-    {% endif %}
-
-    <!-- Заголовок -->
-    <div class="section-title">Объявления, выложенные студентами</div>
+   <div class="categories">
+    {% for cat in all_categories %}
+        <a
+           href="{{ url_for('search.search',
+                            category=cat,
+                            min_price=min_price,
+                            max_price=max_price) }}"
+           class="category-btn">
+            {{ cat }}
+        </a>
+    {% endfor %}
+    <a href="{{ url_for('search.search',
+                        min_price=min_price,
+                        max_price=max_price) }}"
+       class="category-btn">Все категории</a>
 </div>
 
-<div class="container">
+    <!-- Результаты поиска -->
     {% if advertisements %}
         <div class="ad-list">
             {% for ad in advertisements %}
-                <a href="{{ url_for('advert.ad_detail', ad_id=ad.id) }}" class="ad-card">
+                <a href="{{ url_for('advert.ad_detail', ad_id=ad.id) }}"
+                   class="ad-card">
                     {% if ad.images %}
-                        <img src="{{ ad.images[0].url_path }}" alt="{{ ad.title }}">
+                        <img src="{{ ad.images[0].url_path }}"
+                             alt="{{ ad.title }}">
                     {% else %}
-                        <img src="/static/images/default.jpg" alt="Default Image">
+                        <img src="/static/images/default.jpg"
+                             alt="Нет изображения">
                     {% endif %}
                     <div class="ad-title">{{ ad.title }}</div>
                     <div class="ad-price">{{ ad.price }} ₽</div>
@@ -284,7 +302,7 @@
             {% endfor %}
         </div>
     {% else %}
-        <div class="no-ads">Объявлений пока нет</div>
+        <div class="no-ads">Ничего не найдено.</div>
     {% endif %}
 </div>
 

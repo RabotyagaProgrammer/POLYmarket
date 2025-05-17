@@ -1,7 +1,10 @@
 import hashlib
 import secrets
 
-from app.database import db, User, Advertisement
+from sqlalchemy import func, String
+
+from app.database import db, User, Advertisement,Image
+
 import jwt
 
 
@@ -508,3 +511,96 @@ def verify_refresh_token(user_id, provided_token):
     else:
         print(f"Refresh-токен для пользователя {user.email} неверный.")
         return False
+def search_advertisements(field_name, value):
+    # Проверяем, существует ли такое поле в модели Advertisement
+    valid_fields = [col.key for col in Advertisement.__table__.columns] + ['images.url']
+
+    if field_name not in valid_fields:
+        raise ValueError(f"Field '{field_name}' is not a valid column in Advertisement")
+
+    # Формируем фильтр поиска
+    if field_name == 'images.url':
+        # Поиск по URL изображения через связь с Image
+        query = Advertisement.query.join(Advertisement.images).filter(Image.url.ilike(f"%{value}%"))
+    else:
+        # Обычный поиск по полю Advertisement
+        column = getattr(Advertisement, field_name)
+        if isinstance(column.type, String):
+            # Для строковых полей — нечеткое совпадение
+            query = Advertisement.query.filter(column.ilike(f"%{value}%"))
+        else:
+            # Для других типов — точное совпадение
+            try:
+                # Пробуем привести значение к типу колонки
+                typed_value = column.type.python_type(value)
+                query = Advertisement.query.filter(column == typed_value)
+            except (ValueError, TypeError):
+                raise ValueError(f"Value '{value}' can't be cast to type {column.type.python_type}")
+
+    return query.all()
+
+
+CATEGORY_MAP = {
+    'техника': 'tech',
+    'продукты': 'food',
+    'одежда': 'clothes',
+    'книги': 'books',
+    'хозтовары': 'home'
+}
+
+
+def get_all_advertisements_search(query=None, category=None, min_price=None, max_price=None):
+    filters = []
+
+    print("🔍 Поиск объявлений с параметрами:", flush=True)
+
+    if query:
+        lower_query = query.lower()
+        print(f"- Поиск по заголовку: '{query}' (в нижнем регистре)", flush=True)
+        filters.append(func.lower(Advertisement.title).like(f"%{lower_query}%"))
+
+    # Всегда выводим все категории
+    all_categories = (
+        db.session.query(Advertisement.category)
+        .distinct()
+        .order_by(Advertisement.category)
+        .all()
+    )
+    category_list = [c[0] for c in all_categories]
+    print(f"📚 Все доступные категории в базе: {category_list}", flush=True)
+
+    if category:
+        category_lower = category.lower()
+        translated_slug = CATEGORY_MAP.get(category_lower)
+        if translated_slug:
+            print(f"- Фильтр по категории: '{category}' → slug: '{translated_slug}'", flush=True)
+            filters.append(func.lower(Advertisement.category) == translated_slug.lower())
+        else:
+            print(f"⚠️ Неизвестная категория: '{category}'", flush=True)
+
+    if min_price:
+        try:
+            min_price_float = float(min_price)
+            filters.append(Advertisement.price >= min_price_float)
+            print(f"- Минимальная цена: {min_price_float}", flush=True)
+        except ValueError:
+            print(f"⚠️ Ошибка: min_price '{min_price}' не является числом", flush=True)
+
+    if max_price:
+        try:
+            max_price_float = float(max_price)
+            filters.append(Advertisement.price <= max_price_float)
+            print(f"- Максимальная цена: {max_price_float}", flush=True)
+        except ValueError:
+            print(f"⚠️ Ошибка: max_price '{max_price}' не является числом", flush=True)
+
+    # Собираем и выводим результаты
+    results = Advertisement.query.filter(*filters).all()
+    print(f"🎯 Найдено объявлений: {len(results)}", flush=True)
+    for ad in results:
+        print(
+            f"   • ID={ad.id}, title='{ad.title}', price={ad.price}, category='{ad.category}'",
+            flush=True
+        )
+
+    return results

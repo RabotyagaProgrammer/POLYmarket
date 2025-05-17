@@ -30,9 +30,11 @@ def create_app():
     from .routes.admin_routes import  admin_bp
     from .routes.profile_routes import profile_bp
     from .routes.advertisment import advertisement_bp
+    from .routes.search import search_bp
 
 
     app.register_blueprint(profile_bp)
+    app.register_blueprint(search_bp)
     app.register_blueprint(advertisement_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(auth_bp)

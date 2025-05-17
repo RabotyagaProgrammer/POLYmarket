@@ -1,16 +1,18 @@
-from flask import Blueprint, request, redirect, url_for, render_template, current_app, make_response, flash
-from test_db import get_user_data, change_password, get_all_advertisements, \
-    get_all_advertisements_search  # Импорт функции из твоего модуля
-from jwt import ExpiredSignatureError, InvalidTokenError
+import hashlib
+
 import jwt
-from app.jwt_utils import *
+from flask import Blueprint, request, render_template, redirect, url_for
 
-main_bp = Blueprint('main', __name__)
+from jwt import ExpiredSignatureError, InvalidTokenError
 
+from app.database import User
+from app.jwt_utils import refresh_access_token
+from test_db import get_all_advertisements_search, get_user_data
 
-@main_bp.route('/')
-def index():
-    # Проверяем наличие refresh_token в cookies
+search_bp = Blueprint('search', __name__)
+
+@search_bp.route('/search')
+def search():
     refresh_token = request.cookies.get('refresh_token')
     if not refresh_token:
         print("Refresh-токен недействителен или отсутствует.")
@@ -31,7 +33,7 @@ def index():
                 # Декодируем access_token
                 payload = jwt.decode(refresh_token, 'your_secret_key', algorithms=['HS256'])
                 user_id = payload.get('user_id')
-                refresh_access_token(user_id,refresh_token)
+                refresh_access_token(user_id, refresh_token)
             except (ExpiredSignatureError, InvalidTokenError, ValueError) as e:
                 print("Ошибка JWT:", e)
                 return redirect(url_for('auth.login'))
@@ -48,14 +50,19 @@ def index():
         user_data = get_user_data(user_id)
         if not user_data:
             raise ValueError("Пользователь не найден")
-        advertisements = get_all_advertisements()
+        category = request.args.get('category', '').strip()
+        print(f"Полученная категория: {category}")  # Отладка
+        # Очистка и нормализация входных параметров
+        query = request.args.get('q', '').strip()
+        category = request.args.get('category', '').strip()
+        min_price = request.args.get('min_price', '').strip()
+        max_price = request.args.get('max_price', '').strip()
 
-        # Передаем данные в шаблон
-
-        query = None
-        category = None
-        min_price = None
-        max_price = None
+        # Преобразуем пустые строки в None
+        query = query if query else None
+        category = category if category else None
+        min_price = min_price if min_price else None
+        max_price = max_price if max_price else None
 
         advertisements = get_all_advertisements_search(
             query=query,
@@ -72,26 +79,16 @@ def index():
             'Хозтовары'
         ]
 
-        return render_template('index.html',
-                               username=user_data['email'],
-                               is_admin=user_data['is_admin'],
-                               advertisements=advertisements,
-                               query=query or '',
-                               category=category or '',
-                               min_price=min_price or '',
-                               max_price=max_price or '',
-                               all_categories=all_categories
-                               )
-
-
+        return render_template(
+            'search.html',
+            is_admin=user_data['is_admin'],
+            advertisements=advertisements,
+            query=query or '',
+            category=category or '',
+            min_price=min_price or '',
+            max_price=max_price or '',
+            all_categories=all_categories
+        )
     except (ExpiredSignatureError, InvalidTokenError, ValueError) as e:
         print("Ошибка JWT:", e)
         return redirect(url_for('auth.login'))
-
-
-
-
-
-
-
-
