@@ -8,44 +8,47 @@ on:
 
 jobs:
   build:
-    name: Build and Package
+    name: Build & Test
     runs-on: ubuntu-latest
 
     steps:
       # 1. Клонируем репозиторий
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4  # установка кода в рабочую директорию :contentReference[oaicite:0]{index=0}
 
-      # 2. Вывод структуры для отладки (опционально)
-      - name: List repository files
-        run: ls -R .
-
-      # 3. Настраиваем Python
+      # 2. Устанавливаем Python и кешируем pip-зависимости
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v4  # установка Python версии 3.11 :contentReference[oaicite:1]{index=1}
         with:
           python-version: '3.11'
+          cache: 'pip'
 
-      # 4. Обновляем pip и устанавливаем build
-      - name: Install build tool
+      # 3. Устанавливаем зависимости
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install build
+          pip install -r requirements.txt
 
-      # 5. Устанавливаем зависимости проекта
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      # 4. Запуск тестов (если есть)
+      - name: Run tests
+        run: |
+          pytest --maxfail=1 --disable-warnings -q
 
-      # 6. Собираем пакет в wheel/sdist
-      - name: Build distribution
-        run: python -m build .
+      # 5. Сборка Docker-образа веб-приложения
+      - name: Build Docker image
+        run: |
+          docker build -t myapp:${{ github.sha }} .
 
-      # 7. Архивируем артефакты сборки
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+      # 6. Сохраняем Docker-образ в артефакты (как tar)
+      - name: Save Docker image artifact
+        run: |
+          docker save myapp:${{ github.sha }} | gzip > myapp_${{ github.sha }}.tar.gz
+
+      - name: Upload Docker image
+        uses: actions/upload-artifact@v4  # архивирование артефактов :contentReference[oaicite:2]{index=2}
         with:
-          name: dist
-          path: dist/
+          name: docker-image
+          path: myapp_${{ github.sha }}.tar.gz
 
   security:
     name: Static Analysis (Bandit)
@@ -53,7 +56,7 @@ jobs:
     needs: build
 
     steps:
-      # Клонируем код снова для этой job
+      # Повторно клонируем код в security job
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -61,6 +64,6 @@ jobs:
       - name: Install Bandit
         run: pip install bandit
 
-      # Запускаем сканирование
+      # Запускаем статический анализ
       - name: Run Bandit
-        run: bandit -r . -f github
+        run: bandit -r . -f github  # формат отчёта GitHub Checks :contentReference[oaicite:3]{index=3}
