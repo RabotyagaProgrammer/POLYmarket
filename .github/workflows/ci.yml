@@ -8,53 +8,59 @@ on:
 
 jobs:
   build:
-    name: Build Project
+    name: Build and Package
     runs-on: ubuntu-latest
+
     steps:
-      # 1. Клонирование репозитория
+      # 1. Клонируем репозиторий
       - name: Checkout code
-        uses: actions/checkout@v4  # клонирует репозиторий в $GITHUB_WORKSPACE :contentReference[oaicite:0]{index=0}
+        uses: actions/checkout@v4
 
-      # 2. Вывод структуры директорий для отладки
-      - name: List files
-        run: ls -R .                # покажет, где лежит requirements.txt :contentReference[oaicite:1]{index=1}
+      # 2. Вывод структуры для отладки (опционально)
+      - name: List repository files
+        run: ls -R .
 
-      # 3. Настройка Python
+      # 3. Настраиваем Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'    # выбираем последнюю версию 3.x :contentReference[oaicite:2]{index=2}
+          python-version: '3.11'
 
-      # 4. Установка зависимостей
-      - name: Install dependencies
+      # 4. Обновляем pip и устанавливаем build
+      - name: Install build tool
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt  # если файл в корне; иначе скорректируйте путь
+          pip install build
 
-      # 5. Сборка пакета
-      - name: Build wheel
-        run: python -m build .     # создаёт артефакты в папке dist/
+      # 5. Устанавливаем зависимости проекта
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
-      # 6. Архивация сборки
-      - name: Archive build artifacts
-        uses: actions/upload-artifact@v4  # v4 — единственная поддерживаемая на GitHub.com версия :contentReference[oaicite:3]{index=3}
+      # 6. Собираем пакет в wheel/sdist
+      - name: Build distribution
+        run: python -m build .
+
+      # 7. Архивируем артефакты сборки
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist/
 
   security:
-    name: Static Code Analysis (Bandit)
+    name: Static Analysis (Bandit)
     runs-on: ubuntu-latest
     needs: build
+
     steps:
-      # 1. Клонирование для второй задачи
+      # Клонируем код снова для этой job
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Установка Bandit
+      # Устанавливаем Bandit
       - name: Install Bandit
         run: pip install bandit
 
-      # 3. Запуск статического анализа
-      - name: Run Bandit security scan
+      # Запускаем сканирование
+      - name: Run Bandit
         run: bandit -r . -f github
