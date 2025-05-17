@@ -35,7 +35,7 @@ jobs:
 
       # Архивация артефактов сборки
       - name: Archive build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: dist
           path: dist/
