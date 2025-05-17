@@ -2,58 +2,32 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
-  # === Стадия сборки проекта ===
   build:
-    name: Build Project
     runs-on: ubuntu-latest
     steps:
-      # Клонирование репозитория
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      # Установка Python
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
         with:
           python-version: '3.x'
-
-      # Установка зависимостей
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
+      - run: |
+          pip install --upgrade pip
           pip install -r requirements.txt
-
-      # Сборка проекта (например, создание wheel пакета)
-      - name: Build wheel
-        run: |
-          python -m build .
-
-      # Архивация артефактов сборки
+      - run: python -m build .
       - name: Archive build
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist/
 
-  # === Стадия статического анализа кода ===
   security:
-    name: Static Code Analysis (Bandit)
     runs-on: ubuntu-latest
     needs: build
     steps:
-      # Клонирование репозитория
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      # Установка Bandit
-      - name: Install Bandit
-        run: pip install bandit
-      # Запуск анализа кода с отчетом в формате GitHub# Запуск анализа кода с отчетом в формате GitHub# Запуск анализа кода с отчетом в формате GitHub# Запуск анализа кода с отчетом в формате GitHub
-      # Запуск анализа кода с отчетом в формате GitHub
-      - name: Run Bandit security scan
-        run: bandit -r . -f github
+      - uses: actions/checkout@v4
+      - run: pip install bandit
+      - run: bandit -r . -f github
