@@ -23,7 +23,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'    # выбираем последнюю версию 3.x :contentReference[oaicite:2]{index=2}
+          python-version: '3.11'    # выбираем последнюю версию 3.x :contentReference[oaicite:2]{index=2}
 
       # 4. Установка зависимостей
       - name: Install dependencies
