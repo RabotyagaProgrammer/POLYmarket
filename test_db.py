@@ -9,16 +9,17 @@ import jwt
 
 
 # Добавление тестовых данных
-def create_user(email, name, password, is_admin=False, two_factor_secret=None, refresh_token=None):
+def create_user(email, name, password, is_admin=False, two_factor_secret=None, refresh_token=None, telegram=None):
     """
     Создает нового пользователя и сохраняет его в базу данных.
 
     :param email: Логин пользователя (уникальный).
-    :param name: имя фамилия отчество пользователя
+    :param name: Имя пользователя.
     :param password: Пароль пользователя в открытом виде.
     :param is_admin: Флаг администратора (по умолчанию False).
     :param two_factor_secret: Секретный ключ для двухфакторной аутентификации (опционально).
-    :param refresh_token: Рефреш токен
+    :param refresh_token: Рефреш токен.
+    :param telegram: Telegram-имя пользователя.
     :return: Созданный объект User.
     """
     # Проверка, существует ли пользователь с таким username
@@ -35,7 +36,8 @@ def create_user(email, name, password, is_admin=False, two_factor_secret=None, r
         password_hash=password_hash,
         is_admin=is_admin,
         two_factor_secret=two_factor_secret,
-        refresh_token=refresh_token
+        refresh_token=refresh_token,
+        tg_contact=telegram
     )
 
     # Добавление пользователя в сессию и сохранение в базу данных
@@ -43,7 +45,6 @@ def create_user(email, name, password, is_admin=False, two_factor_secret=None, r
     db.session.commit()
 
     return new_user
-
 
 def get_user_by_field(field, value):
     """

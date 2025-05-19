@@ -35,7 +35,7 @@ with app.app_context():
     #         category=ad["category"]
     #     )
 
-    # create_user('admin@gmail.com', 'admin', 'admin',True)
+    #create_user('admin@gmail.com', 'admin', 'admin',True)
 if __name__ == '__main__':
     app.run(debug=True)
 

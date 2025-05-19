@@ -43,20 +43,20 @@ def register():
         email = request.form.get('email')
         password = request.form.get('password')
         confirm = request.form.get('confirm_password')
+        telegram_username = request.form.get('telegram')
 
         if password != confirm:
             flash('Пароли не совпадают')
             return redirect(url_for('auth.register'))
         delete_user(2)
-        if create_user(email, name,  password, False, None, None):
-            user = get_user_by_field('username', email)
+        if create_user(email, name, password, False, None, None, telegram_username):
+            user = get_user_by_field('email', email)
             session['2fa_user_id'] = user.id
             print(name)
             id_tmp = user.id
             key = generate_otp()
             send_email(email, key)
             add_two_factor_secret(id_tmp, key)
-            # Здесь позже будет логика создания пользователя и отправки email
             db.session.commit()
             return redirect(url_for('auth.email_confirmation'))
         else:

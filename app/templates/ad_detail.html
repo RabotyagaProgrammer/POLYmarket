@@ -80,6 +80,8 @@
 
     <div class="ad-owner">
         Владелец: <a href="#">{{ owner.name }}</a>
+        <br>
+        Telegram: <a href="https://t.me/{{ owner.tg_contact }}" target="_blank">{{ owner.tg_contact }}</a>
     </div>
 
     <a href="{{ url_for('main.index') }}">← Назад к главной</a>
